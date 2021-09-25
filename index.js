@@ -91,7 +91,7 @@ async function getElements(driver,vars,waitTime=0){
 }        
 
 //Used to get element attribute
-async function getElemAttrByXPath(driver,vars,waitTime=0){
+async function getElemAttr(driver,vars,waitTime=0){
     let xPathStr = vars[0], attributeType = vars[1];
     var element = await getElement(driver,xPathStr);
     var attribute = await element.getAttribute(attributeType);
@@ -100,9 +100,9 @@ async function getElemAttrByXPath(driver,vars,waitTime=0){
 }
 
 //Used to get given attribute of many elements
-async function getElemsAttrByXPath(driver,vars,waitTime=0){
+async function getElemsAttr(driver,vars,waitTime=0){
     let xPathStr = vars[0], attributeType = vars[1];
-    var elemAttrs = await driver.findElements(By.xpath(xPathStr))
+    var elemAttrs = await getElements(driver,xPathStr);
 
     for(i = 0;i<elemAttrs.length;i++) elemAttrs[i] = await elemAttrs[i].getAttribute(attributeType);
 
