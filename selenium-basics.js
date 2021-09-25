@@ -1,13 +1,11 @@
 const {Builder, By, Key, util, WebElement} = require("selenium-webdriver")
 const { elementIsNotSelected } = require("selenium-webdriver/lib/until");
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////           Generic Methods           ///////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-
 // Used to wait some time in seconds
-async function wait(timeInSeconds){
+module.exports.wait = async function (timeInSeconds){
     await new Promise(resolve => setTimeout(resolve, 1000*timeInSeconds));
 }    
 
@@ -16,27 +14,27 @@ async function wait(timeInSeconds){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Get a new driver
-async function getDriver(){
+module.exports.getDriver = async function (){
     return await new Builder().forBrowser("firefox").build();
 }
 
 //Maximize current window
-async function maximizeWindow(driver){ //Maximize window
+module.exports.maximizeWindow = async function (driver){ //Maximize window
     await driver.manage().window().maximize();
 }
 
 //Go to 'pagePath' webpage
-async function goToPage(driver,pagePath){
+module.exports.goToPage = async function (driver,pagePath){
     await driver.get(pagePath);
 }
 
 //Open new window and goes to that window, if 'returnCurWindow=true' it returns current window
-async function openWindow(driver,newWindowUrl,waitTime,returnCurWindow=false){
+module.exports.openWindow = async function (driver,newWindowUrl,waitTime,returnCurWindow=false){
     await driver.executeScript('window.open("' + newWindowUrl + '");');
     
     let windows = await driver.getAllWindowHandles();
     await driver.switchTo().window(windows[windows.length - 1]);
-
+    
     await wait(waitTime);
     if (returnCurWindow){
         return windows[windows.length - 2]
@@ -44,7 +42,7 @@ async function openWindow(driver,newWindowUrl,waitTime,returnCurWindow=false){
 }
 
 //Close current window and go to passed window, or previous one, if no window is passed
-async function closeWindow(driver,waitTime,nextWindow=null){ 
+module.exports.closeWindow = async function (driver,waitTime,nextWindow=null){ 
     await driver.close();
     let windows = await driver.getAllWindowHandles();
     let toGoWindow = (nextWindow === null ? windows[windows.length - 1] : nextWindow);
@@ -58,7 +56,7 @@ async function closeWindow(driver,waitTime,nextWindow=null){
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Used to type
-async function typeSlowly(driver,string,xpathStr,waitTimeKey,waitTimeEnd){
+module.exports.typeSlowly = async function (driver,string,xpathStr,waitTimeKey,waitTimeEnd){
     for(const key of string){
         await driver.findElement(By.xpath(xpathStr)).sendKeys(key);
         await wait(waitTimeKey);
@@ -67,7 +65,7 @@ async function typeSlowly(driver,string,xpathStr,waitTimeKey,waitTimeEnd){
 }     
 
 //Used to click
-async function clickXPath(driver,vars,waitTime=0){
+module.exports.clickXPath = async function (driver,vars,waitTime=0){
     let xPathStr = vars[0];
     await driver.findElement(By.xpath(xPathStr)).click();
     await wait(waitTime);
@@ -75,7 +73,7 @@ async function clickXPath(driver,vars,waitTime=0){
 }    
 
 //Used to get element
-async function getElement(driver,vars,waitTime=0){
+module.exports.getElement = async function (driver,vars,waitTime=0){
     let xPathStr = vars[0];
     let element = await driver.findElement(By.xpath(xPathStr));
     await wait(waitTime);
@@ -83,7 +81,7 @@ async function getElement(driver,vars,waitTime=0){
 }    
 
 //Used to get elements array
-async function getElements(driver,vars,waitTime=0){
+module.exports.getElements = async function (driver,vars,waitTime=0){
     let xPathStr = vars[0];
     let elements = await driver.findElements(By.xpath(xPathStr));
     await wait(waitTime);
@@ -91,7 +89,7 @@ async function getElements(driver,vars,waitTime=0){
 }        
 
 //Used to get element attribute
-async function getElemAttr(driver,vars,waitTime=0){
+module.exports.getElemAttrByXPath = async function (driver,vars,waitTime=0){
     let xPathStr = vars[0], attributeType = vars[1];
     var element = await getElement(driver,xPathStr);
     var attribute = await element.getAttribute(attributeType);
@@ -100,12 +98,12 @@ async function getElemAttr(driver,vars,waitTime=0){
 }
 
 //Used to get given attribute of many elements
-async function getElemsAttr(driver,vars,waitTime=0){
+module.exports.getElemsAttrByXPath = async function (driver,vars,waitTime=0){
     let xPathStr = vars[0], attributeType = vars[1];
-    var elemAttrs = await getElements(driver,xPathStr);
-
+    var elemAttrs = await driver.findElements(By.xpath(xPathStr))
+    
     for(i = 0;i<elemAttrs.length;i++) elemAttrs[i] = await elemAttrs[i].getAttribute(attributeType);
-
+    
     await wait(waitTime);
     return elemAttrs;
 }
@@ -117,7 +115,7 @@ async function getElemsAttr(driver,vars,waitTime=0){
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 //To make action or return error, otherwise
-async function xPathTryCatch(driver,funct,vars,errorMessage,waitTime=0){
+module.exports.xPathTryCatch = async function (driver,funct,vars,errorMessage,waitTime=0){
     let returnVal = false;
     try{
         returnVal = await funct(driver,vars);
@@ -131,7 +129,7 @@ async function xPathTryCatch(driver,funct,vars,errorMessage,waitTime=0){
 }
 
 //To try getting element until satisfied or maxRepts is reach 
-async function xPathWhileTrue(driver,funct,vars,waitTime=0,waitBetween=0.5,maxRepts=1000){
+module.exports.xPathWhileTrue = async function (driver,funct,vars,waitTime=0,waitBetween=0.5,maxRepts=1000){
     var continueWhile = true;
     var returnVal = false;
     let iter = 0;
